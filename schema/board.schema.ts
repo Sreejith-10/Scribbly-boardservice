@@ -1,13 +1,21 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 import { User, UserSchema } from './user.schema';
 import { Shape, ShapeSchema } from './shape.schema';
 import { BoardVersion, BoardVersionSchema } from './version.schema';
 
 export type BoardDocument = HydratedDocument<Board>;
 
-@Schema({ versionKey: true, timestamps: true, collection: 'boards' })
+@Schema({ timestamps: true, collection: 'boards' })
 export class Board {
+  @Prop({
+    type: Types.ObjectId,
+    default: () => new Types.ObjectId(),
+    required: true,
+    unique: true,
+  })
+  boardId: Types.ObjectId;
+
   @Prop({ required: true })
   ownerId: string;
 

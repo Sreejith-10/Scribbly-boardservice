@@ -1,21 +1,26 @@
-import { Module } from '@nestjs/common';
-import { BoardModule } from './board/board.module';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { BoardModule } from './board';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
+import { AuthMiddleware } from './middleware';
 
 @Module({
-    imports: [
-        ConfigModule.forRoot({
-            isGlobal: true,
-        }),
-        MongooseModule.forRootAsync({
-            useFactory: async (configService: ConfigService) => {
-                return {
-                    uri: configService.getOrThrow<string>('MONGO_URI'),
-                };
-            },
-        }),
-        BoardModule,
-    ],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    MongooseModule.forRootAsync({
+      useFactory: async () => {
+        return {
+          uri: 'mongodb://127.0.0.1:27017/scribbly',
+        };
+      },
+    }),
+    BoardModule,
+  ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuthMiddleware).forRoutes('board');
+  }
+}
